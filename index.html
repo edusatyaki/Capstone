@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capstone Execution Playbook</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        :root {
+            /* Corporate/Documentation Palette */
+            --bg-body: #ffffff;
+            --bg-subtle: #f8fafc;
+            --bg-sidebar: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --text-light: #94a3b8;
+            --border-light: #e2e8f0;
+            --border-strong: #cbd5e1;
+            
+            /* Accents */
+            --accent-color: #2563eb;
+            --accent-bg: #eff6ff;
+            --accent-hover: #1d4ed8;
+            
+            /* Status Colors */
+            --status-success-bg: #f0fdf4;
+            --status-success-text: #15803d;
+            --status-success-border: #bbf7d0;
+            --status-warning-bg: #fffbeb;
+            --status-warning-text: #b45309;
+            --status-warning-border: #fde68a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        /* --- LAYOUT WRAPPER --- */
+        .layout-wrapper {
+            display: flex;
+            min-height: 100vh;
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        /* --- MOBILE HEADER (Hidden on Desktop) --- */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--bg-body);
+            border-bottom: 1px solid var(--border-light);
+            z-index: 50;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .mobile-header .brand-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-main);
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+        }
+
+        /* --- SIDEBAR OVERLAY (Mobile) --- */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(2px);
+            z-index: 90;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-light);
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            padding: 32px 24px;
+            overflow-y: auto;
+            flex-shrink: 0;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 1.125rem;
+            color: var(--text-main);
+            margin-bottom: 40px;
+            letter-spacing: -0.01em;
+        }
+
+        .brand-logo i {
+            color: var(--accent-color);
+        }
+
+        .nav-group-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-light);
+            font-weight: 600;
+            margin-bottom: 12px;
+            margin-top: 32px;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            margin-bottom: 4px;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item a:hover {
+            background: var(--bg-body);
+            color: var(--text-main);
+        }
+
+        .nav-item a.active {
+            background: var(--accent-bg);
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .nav-item a i {
+            width: 16px;
+            height: 16px;
+            stroke-width: 2.5px;
+        }
+
+        /* --- MAIN CONTENT AREA --- */
+        .main-content {
+            flex: 1;
+            padding: 64px 80px;
+            max-width: 960px;
+        }
+
+        .page-header {
+            margin-bottom: 64px;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            color: var(--text-main);
+            margin-bottom: 16px;
+        }
+
+        .page-header p {
+            font-size: 1.125rem;
+            color: var(--text-muted);
+            max-width: 700px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        .stat-card {
+            background: var(--bg-body);
+            border: 1px solid var(--border-light);
+            padding: 16px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .stat-card .label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .stat-card .value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-card i {
+            width: 16px;
+            height: 16px;
+            color: var(--text-light);
+        }
+
+        /* --- CONTENT SECTIONS --- */
+        .section {
+            margin-bottom: 80px;
+            scroll-margin-top: 80px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: var(--text-main);
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Cards & Grids */
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+
+        .info-card {
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 24px;
+            background: var(--bg-body);
+        }
+
+        .info-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-card h3 i {
+            width: 18px;
+            height: 18px;
+            color: var(--text-light);
+        }
+
+        .info-card ul {
+            list-style: none;
+        }
+
+        .info-card li {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .info-card li::before {
+            content: "•";
+            color: var(--border-strong);
+            font-weight: bold;
+        }
+
+        /* --- MISSION CALLOUT --- */
+        .mission-callout {
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-light);
+            border-left: 4px solid var(--accent-color);
+            padding: 32px;
+            border-radius: 8px;
+            margin-bottom: 64px;
+        }
+
+        .mission-callout h3 {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .mission-callout p {
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
+        /* --- PROFESSIONAL TIMELINE --- */
+        .timeline {
+            border-left: 2px solid var(--border-light);
+            margin-left: 12px;
+            padding-left: 32px;
+            margin-top: 32px;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 48px;
+        }
+
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -41px;
+            top: 0;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #fff;
+            border: 2px solid var(--accent-color);
+            box-shadow: 0 0 0 4px var(--bg-body);
+        }
+
+        .timeline-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .timeline-header h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .duration-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: var(--bg-subtle);
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid var(--border-light);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .timeline-item p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        /* Deliverables Note */
+        .deliverable-note {
+            background: var(--status-success-bg);
+            border: 1px solid var(--status-success-border);
+            padding: 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: var(--status-success-text);
+        }
+
+        .deliverable-note strong {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+            color: #166534;
+        }
+
+        .deliverable-note strong i {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* --- TABLES --- */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .data-table th, .data-table td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .data-table th {
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.75rem;
+        }
+
+        .data-table td {
+            color: var(--text-main);
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* --- MOBILE RESPONSIVENESS --- */
+        @media (max-width: 1024px) {
+            .mobile-header {
+                display: flex;
+            }
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                height: 100%;
+                z-index: 100;
+            }
+            .sidebar.active {
+                transform: translateX(280px);
+            }
+            .main-content {
+                padding: 100px 32px 64px; /* Added top padding for fixed mobile header */
+                max-width: 100%;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .main-content {
+                padding: 90px 20px 60px;
+            }
+            .page-header h1 {
+                font-size: 2rem;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            .timeline-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            .data-table th, .data-table td {
+                padding: 12px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="mobile-header">
+        <div class="brand-title">Capstone Playbook</div>
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+            <i data-lucide="menu"></i>
+        </button>
+    </header>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="layout-wrapper">
+        
+        <aside class="sidebar" id="sidebar">
+            <div class="brand-logo">
+                <i data-lucide="box"></i> Capstone Hub
+            </div>
+            
+            <div class="nav-group-title">Introduction</div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="#overview" class="nav-link active"><i data-lucide="layout-template"></i> Program Overview</a></li>
+            </ul>
+
+            <div class="nav-group-title">Execution Stages</div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="#stage-0" class="nav-link"><i data-lucide="circle-dashed"></i> Stage 0: Initiation</a></li>
+                <li class="nav-item"><a href="#stage-1" class="nav-link"><i data-lucide="database"></i> Stage 1: Foundation</a></li>
+                <li class="nav-item"><a href="#stage-2" class="nav-link"><i data-lucide="pie-chart"></i> Stage 2: Dashboard</a></li>
+                <li class="nav-item"><a href="#stage-3" class="nav-link"><i data-lucide="award"></i> Stage 3: Evaluation</a></li>
+            </ul>
+
+            <div class="nav-group-title">Guidelines</div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="#rules" class="nav-link"><i data-lucide="scale"></i> Rules & Advice</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            
+            <section id="overview" class="page-header">
+                <h1>Execution Playbook</h1>
+                <p>An industry-grade analytics simulation. Follow this structured 3-week guide to transition from raw datasets to interactive, decision-grade insights.</p>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="label">Duration</span>
+                        <span class="value"><i data-lucide="calendar"></i> 3 Weeks</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="label">Team Size</span>
+                        <span class="value"><i data-lucide="users"></i> 6 Students</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="label">Data Processing</span>
+                        <span class="value"><i data-lucide="terminal"></i> Python</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="label">Visualization</span>
+                        <span class="value"><i data-lucide="bar-chart-2"></i> Tableau</span>
+                    </div>
+                </div>
+            </section>
+
+            <div class="mission-callout">
+                <h3>Core Mission Objective</h3>
+                <p>"How can data improve planning, performance, or decision-making in your chosen sector?"</p>
+            </div>
+
+            <section class="section" id="stage-0">
+                <h2 class="section-title"><i data-lucide="circle-dashed"></i> Stage 0: Initiation</h2>
+                <div class="grid-3">
+                    <div class="info-card">
+                        <h3><i data-lucide="sitemap"></i> Team Roles</h3>
+                        <ul>
+                            <li>Project Lead</li>
+                            <li>Python/Pandas Lead</li>
+                            <li>SciPy/Stats Lead</li>
+                            <li>Tableau Lead</li>
+                            <li>Documentation Lead</li>
+                            <li>Presentation Lead</li>
+                        </ul>
+                    </div>
+                    <div class="info-card">
+                        <h3><i data-lucide="building"></i> Domain Options</h3>
+                        <ul>
+                            <li>Health & Welfare</li>
+                            <li>Defence & Transport</li>
+                            <li>Finance & Banking</li>
+                            <li>Agriculture & Rural</li>
+                            <li>Energy & Environment</li>
+                        </ul>
+                    </div>
+                    <div class="info-card">
+                        <h3><i data-lucide="target"></i> Problem Types</h3>
+                        <ul>
+                            <li>Performance Analysis</li>
+                            <li>Trend & Forecasting</li>
+                            <li>Resource Optimization</li>
+                            <li>Risk/Anomaly Detection</li>
+                            <li>Policy Impact Analysis</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="stage-1">
+                <h2 class="section-title"><i data-lucide="database"></i> Stage 1: Data Foundation</h2>
+                
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-header">
+                            <h4>Acquisition & Planning</h4>
+                            <span class="duration-badge"><i data-lucide="clock"></i> Days 1 - 2</span>
+                        </div>
+                        <p>Finalize your sector and exact problem statement. Acquire a robust dataset relevant to your domain and submit your initial strategy.</p>
+                        <div class="deliverable-note">
+                            <strong><i data-lucide="check-circle-2"></i> Output Required</strong>
+                            Problem Statement Document, Raw Dataset Link, High-level Analysis Plan.
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-header">
+                            <h4>Data Cleaning (Python)</h4>
+                            <span class="duration-badge"><i data-lucide="clock"></i> Days 3 - 4</span>
+                        </div>
+                        <p>Import data into a Jupyter Notebook. Handle missing values, remove duplicates, standardize formats, and generate a precise Data Dictionary.</p>
+                        <div class="deliverable-note">
+                            <strong><i data-lucide="check-circle-2"></i> Output Required</strong>
+                            Cleaned Dataset (CSV/Excel), Cleaning Script (.ipynb), Data Dictionary.
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-header">
+                            <h4>Exploratory Data Analysis</h4>
+                            <span class="duration-badge"><i data-lucide="clock"></i> Days 5 - 7</span>
+                        </div>
+                        <p>Use Matplotlib/Seaborn to explore distributions and correlations. Identify core KPIs and extract 15-20 meaningful initial insights.</p>
+                        <div class="deliverable-note">
+                            <strong><i data-lucide="check-circle-2"></i> Output Required</strong>
+                            EDA Jupyter Notebook, Insight Document (Top 15-20 findings).
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="stage-2">
+                <h2 class="section-title"><i data-lucide="pie-chart"></i> Stage 2: Insights & Visualization</h2>
+                
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-header">
+                            <h4>Advanced Analysis</h4>
+                            <span class="duration-badge"><i data-lucide="clock"></i> Days 8 - 10</span>
+                        </div>
+                        <p>Perform statistical analysis, segmentation, clustering, time-series forecasting, or root-cause analysis using Python libraries (SciPy/Scikit-learn).</p>
+                        <div class="deliverable-note">
+                            <strong><i data-lucide="check-circle-2"></i> Output Required</strong>
+                            Advanced Analysis Results & Python Code.
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-header">
+                            <h4>Dashboard Development</h4>
+                            <span class="duration-badge"><i data-lucide="clock"></i> Days 11 - 12</span>
+                        </div>
+                        <p>Connect clean Python data to Tableau. Build an interactive, professional dashboard featuring both an Executive View and an Operational View.</p>
+                        <div class="deliverable-note">
+                            <strong><i data-lucide="check-circle-2"></i> Output Required</strong>
+                            Fully Working Tableau Dashboard (Workbook or Public link).
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-header">
+                            <h4>Packaging & Polish</h4>
+                            <span class="duration-badge"><i data-lucide="clock"></i> Days 13 - 14</span>
+                        </div>
+                        <p>Compile all work into a professional PPT and PDF report summarizing the business problem, methodology, insights, and recommendations.</p>
+                        <div class="deliverable-note" style="background: var(--accent-bg); border-color: #bfdbfe; color: var(--accent-hover);">
+                            <strong style="color: var(--accent-hover);"><i data-lucide="package-check"></i> Final Submission Package</strong>
+                            Dashboard Link, Final PPT, Final Report (PDF), Datasets, All Scripts.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="stage-3">
+                <h2 class="section-title"><i data-lucide="award"></i> Stage 3: Evaluation Phase</h2>
+                
+                <div class="info-card" style="margin-bottom: 32px; border-left: 4px solid #f59e0b; background: var(--status-warning-bg);">
+                    <h3 style="color: var(--status-warning-text);"><i data-lucide="alert-triangle"></i> Viva & Presentation Rules</h3>
+                    <p style="font-size: 0.95rem; color: #92400e; margin-top: 8px;">
+                        No project building occurs in Week 3. Teams have 10 minutes to present the PPT and Dashboard, followed by a 5-minute Q&A. The panel may ask any team member to explain any Python code or Tableau logic.
+                    </p>
+                </div>
+
+                <div class="info-card" style="padding: 0; overflow: hidden;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Criteria</th>
+                                <th>Evaluated Artifacts</th>
+                                <th style="text-align: right;">Marks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Problem Understanding</td>
+                                <td>PPT & Framing</td>
+                                <td style="text-align: right; font-weight: 600;">10</td>
+                            </tr>
+                            <tr>
+                                <td>Data Cleaning & Quality</td>
+                                <td>Python Scripts</td>
+                                <td style="text-align: right; font-weight: 600;">15</td>
+                            </tr>
+                            <tr>
+                                <td>Analysis Depth</td>
+                                <td>Python Stats & EDA</td>
+                                <td style="text-align: right; font-weight: 600;">25</td>
+                            </tr>
+                            <tr>
+                                <td>Dashboard & Visualization</td>
+                                <td>Tableau Workflow</td>
+                                <td style="text-align: right; font-weight: 600;">20</td>
+                            </tr>
+                            <tr>
+                                <td>Business Recommendations</td>
+                                <td>PPT & Report</td>
+                                <td style="text-align: right; font-weight: 600;">20</td>
+                            </tr>
+                            <tr>
+                                <td>Storytelling & Clarity</td>
+                                <td>Live Presentation</td>
+                                <td style="text-align: right; font-weight: 600;">10</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="section" id="rules">
+                <h2 class="section-title"><i data-lucide="scale"></i> Rules & Advice</h2>
+                <div class="grid-2">
+                    <div class="info-card">
+                        <h3 style="color: #dc2626;"><i data-lucide="shield-alert" style="color: #dc2626;"></i> Strict Rules</h3>
+                        <ul>
+                            <li>Zero tolerance for plagiarism.</li>
+                            <li>No copying logic from other teams.</li>
+                            <li>Late submissions incur grade penalties.</li>
+                            <li>You must understand your teammate's code.</li>
+                        </ul>
+                    </div>
+                    <div class="info-card">
+                        <h3><i data-lucide="trending-up"></i> Top-Tier Expectations</h3>
+                        <ul>
+                            <li>Insights beyond simple observation.</li>
+                            <li>Dashboards answering specific business queries.</li>
+                            <li>Actionable, practical policy recommendations.</li>
+                            <li>Immaculately formatted code with comments.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // Mobile Menu Toggle Logic
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        function toggleMenu() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            
+            // Toggle icon between menu and close
+            const icon = menuToggle.querySelector('i');
+            if(sidebar.classList.contains('active')) {
+                icon.setAttribute('data-lucide', 'x');
+            } else {
+                icon.setAttribute('data-lucide', 'menu');
+            }
+            lucide.createIcons();
+        }
+
+        menuToggle.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+
+        // Close mobile menu when a link is clicked
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if(window.innerWidth <= 1024) {
+                    toggleMenu();
+                }
+            });
+        });
+
+        // ScrollSpy Logic (Highlights active section in sidebar)
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('.page-header, .section');
+            
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (scrollY >= sectionTop - 150) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+
+            // Smooth scrolling for sidebar links
+            navLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
